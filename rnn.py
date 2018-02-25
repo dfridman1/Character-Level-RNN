@@ -61,3 +61,41 @@ def rnn_training_step(rnn, hidden_state, x, y, params):
     loss /= len(x)
     dparams = rnn.backward(dlogits)
     return loss, hidden_state, dparams
+
+
+def sample(rnn, hidden_state, input, params, n=100):
+    one_hot = []
+    while n > 0:
+        if len(input.shape) == 1:
+            input = np.expand_dims(input, 0)
+        hidden_state, logits = rnn(hidden_state, input, params)
+        logits = logits[0].squeeze()
+        probs = _logits_to_probs(logits)
+        idx = np.random.choice(len(logits), p=probs)
+        one_hot_char = np.zeros_like(logits)
+        one_hot_char[idx] = 1
+        one_hot.append(one_hot_char)
+        input = one_hot_char
+        n -= 1
+    return np.asarray(one_hot)
+
+
+def _logits_to_probs(logits):
+    logits = logits.copy()
+    logits -= np.max(logits)
+    unnormalized_probs = np.exp(logits)
+    return unnormalized_probs / np.sum(unnormalized_probs)
+
+
+def init_params(vocab_size, hidden_size, std=0.01):
+    init_weights = lambda size: np.random.randn(*size) * std
+    init_bias = lambda num_outputs: np.zeros((num_outputs,))
+    params = {
+        'i2h': init_weights((vocab_size, hidden_size)),
+        'h2h': init_weights((hidden_size, hidden_size)),
+        'h2o': init_weights((hidden_size, vocab_size)),
+        'i2h_b': init_bias(hidden_size),
+        'h2h_b': init_bias(hidden_size),
+        'h2o_b': init_bias(vocab_size)
+    }
+    return params
