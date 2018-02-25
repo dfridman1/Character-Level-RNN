@@ -13,9 +13,9 @@ def parse_args():
     parser.add_argument('--seq_length', type=int, default=25)
     parser.add_argument('--sample_every', type=int, default=10000)
     parser.add_argument('--sample_size', type=int, default=200)
-    parser.add_argument('--num_epochs', type=int, default=10)
+    parser.add_argument('--num_epochs', type=int, default=2)
     parser.add_argument('--lr', type=float, default=1e-3)
-    parser.add_argument('--print_every', type=int, default=1000)
+    parser.add_argument('--print_every', type=int, default=10000)
     return parser.parse_args()
 
 
